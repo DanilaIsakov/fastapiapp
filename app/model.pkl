@@ -1,29 +1,14 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
+from sklearn.datasets import load_iris
+from sklearn.ensemble import RandomForestClassifier
 import joblib
-import numpy as np
 
-app = FastAPI()
+# Загружаем данные
+data = load_iris()
+X, y = data.data, data.target
 
-# Загружаем модель
-model = joblib.load("model.pkl")
+# Обучаем модель
+model = RandomForestClassifier()
+model.fit(X, y)
 
-
-# Описание входных данных для предсказания
-class IrisFeatures(BaseModel):
-    sepal_length: float
-    sepal_width: float
-    petal_length: float
-    petal_width: float
-
-
-@app.post("/predict")
-def predict(features: IrisFeatures):
-    # Формируем массив признаков из полученных данных
-    data = np.array([[features.sepal_length, features.sepal_width, features.petal_length, features.petal_width]])
-
-    # Получаем предсказание модели
-    prediction = model.predict(data)
-
-    # Возвращаем результат
-    return {"predicted_class": int(prediction[0])}
+# Сохраняем модель в файл model.pkl
+joblib.dump(model, "model.pkl")
